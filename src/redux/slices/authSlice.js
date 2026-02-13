@@ -1,12 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    user: null,
+    user: JSON.parse(localStorage.getItem('user')) || null,
     token: localStorage.getItem('token') || null,
-    isAuthenticated: false,
+    isAuthenticated: !!localStorage.getItem('token'),
     loading: false,
     error: null,
-    role: null, // 'patient', 'doctor', 'admin'
+    role: JSON.parse(localStorage.getItem('user'))?.role || null,
 };
 
 const authSlice = createSlice({
@@ -23,10 +23,14 @@ const authSlice = createSlice({
             state.user = action.payload.user;
             state.token = action.payload.token;
             state.role = action.payload.user.role;
+            state.error = null;
+            // Token is already saved by authService, but keep for consistency
             localStorage.setItem('token', action.payload.token);
+            localStorage.setItem('user', JSON.stringify(action.payload.user));
         },
         loginFailure: (state, action) => {
             state.loading = false;
+            state.isAuthenticated = false;
             state.error = action.payload;
         },
         logout: (state) => {
@@ -34,10 +38,13 @@ const authSlice = createSlice({
             state.token = null;
             state.isAuthenticated = false;
             state.role = null;
+            state.error = null;
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
         },
         updateProfile: (state, action) => {
             state.user = { ...state.user, ...action.payload };
+            localStorage.setItem('user', JSON.stringify(state.user));
         },
     },
 });

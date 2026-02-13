@@ -47,8 +47,8 @@ const Register = () => {
         }
         if (!formData.password) {
             newErrors.password = 'Password is required';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'Password must be at least 6 characters';
+        } else if (formData.password.length < 8) {
+            newErrors.password = 'Password must be at least 8 characters';
         }
         if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = 'Passwords do not match';
@@ -120,10 +120,11 @@ const Register = () => {
                     <button
                         type="button"
                         onClick={() => setUserType('patient')}
-                        className={`flex-1 py-4 px-6 rounded-xl border-2 transition-all ${userType === 'patient'
+                        className={`flex-1 py-4 px-6 rounded-xl border-2 transition-all ${
+                            userType === 'patient'
                                 ? 'border-primary-600 bg-primary-50'
                                 : 'border-gray-300 hover:border-primary-300'
-                            }`}
+                        }`}
                     >
                         <FaUser className={`mx-auto text-3xl mb-2 ${userType === 'patient' ? 'text-primary-600' : 'text-gray-400'}`} />
                         <p className={`font-semibold ${userType === 'patient' ? 'text-primary-600' : 'text-gray-600'}`}>
@@ -133,10 +134,11 @@ const Register = () => {
                     <button
                         type="button"
                         onClick={() => setUserType('doctor')}
-                        className={`flex-1 py-4 px-6 rounded-xl border-2 transition-all ${userType === 'doctor'
+                        className={`flex-1 py-4 px-6 rounded-xl border-2 transition-all ${
+                            userType === 'doctor'
                                 ? 'border-primary-600 bg-primary-50'
                                 : 'border-gray-300 hover:border-primary-300'
-                            }`}
+                        }`}
                     >
                         <FaUserMd className={`mx-auto text-3xl mb-2 ${userType === 'doctor' ? 'text-primary-600' : 'text-gray-400'}`} />
                         <p className={`font-semibold ${userType === 'doctor' ? 'text-primary-600' : 'text-gray-600'}`}>

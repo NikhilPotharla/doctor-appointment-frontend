@@ -58,9 +58,16 @@ const Login = () => {
             const response = await authService.login(formData);
             dispatch(loginSuccess(response));
 
-            // Redirect based on role
-            const role = response.user.role;
-            navigate(`/${role}/dashboard`);
+            // Redirect based on role (backend returns uppercase: PATIENT, DOCTOR, ADMIN)
+            const role = response.user.role.toLowerCase();
+            
+            if (role === 'admin') {
+                navigate('/admin/dashboard');
+            } else if (role === 'doctor') {
+                navigate('/doctor/dashboard');
+            } else {
+                navigate('/patient/dashboard');
+            }
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
             dispatch(loginFailure(errorMessage));
@@ -152,11 +159,11 @@ const Login = () => {
 
                     {/* Social Login */}
                     <div className="mt-6 grid grid-cols-2 gap-3">
-                        <button className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button type="button" className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                             <FaGoogle className="text-red-500 mr-2" />
                             <span className="text-sm font-medium text-gray-700">Google</span>
                         </button>
-                        <button className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button type="button" className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                             <FaFacebook className="text-blue-600 mr-2" />
                             <span className="text-sm font-medium text-gray-700">Facebook</span>
                         </button>
