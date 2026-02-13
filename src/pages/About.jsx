@@ -3,8 +3,37 @@ import { motion } from 'framer-motion';
 import { FaHeart, FaUsers, FaAward, FaShieldAlt, FaUserMd, FaLinkedin, FaTwitter } from 'react-icons/fa';
 import AnimatedSection from '../components/common/AnimatedSection';
 import Card from '../components/common/Card';
+import Carousel from '../components/common/Carousel';
 
 const About = () => {
+    // Hero carousel images
+    const heroImages = [
+        {
+            url: 'https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=1920&h=800&fit=crop',
+            alt: 'Medical team collaboration',
+            title: 'About HealthCare',
+            description: 'Transforming healthcare through innovation, compassion, and excellence'
+        },
+        {
+            url: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?w=1920&h=800&fit=crop',
+            alt: 'Healthcare professionals',
+            title: 'Our Mission',
+            description: 'Providing accessible, high-quality healthcare for everyone'
+        },
+        {
+            url: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=1920&h=800&fit=crop',
+            alt: 'Modern medical facility',
+            title: 'Excellence in Care',
+            description: 'State-of-the-art facilities and expert medical professionals'
+        },
+        {
+            url: 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=1920&h=800&fit=crop',
+            alt: 'Patient care',
+            title: 'Patient-Centered',
+            description: 'Your health and well-being are our top priority'
+        }
+    ];
+
     const stats = [
         { icon: FaUsers, value: '50,000+', label: 'Happy Patients' },
         { icon: FaUserMd, value: '500+', label: 'Expert Doctors' },
@@ -72,30 +101,46 @@ const About = () => {
 
     return (
         <div className="min-h-screen">
-            {/* Hero Section */}
-            <section className="relative bg-gradient-to-br from-primary-600 to-secondary-600 text-white py-24 overflow-hidden">
-                <motion.div
-                    className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"
-                    animate={{ x: [0, 50, 0], y: [0, 30, 0] }}
-                    transition={{ duration: 20, repeat: Infinity }}
-                />
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <motion.h1
-                        className="text-5xl md:text-6xl font-bold mb-6"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        About HealthCare
-                    </motion.h1>
-                    <motion.p
-                        className="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                    >
-                        Transforming healthcare through innovation, compassion, and excellence
-                    </motion.p>
+            {/* Hero Section - Full Screen Carousel */}
+            <section className="relative h-[600px] md:h-[700px] w-full overflow-hidden">
+                {/* Full-width Carousel */}
+                <div className="absolute inset-0 w-full h-full">
+                    <Carousel
+                        images={heroImages}
+                        autoPlay={true}
+                        interval={5000}
+                        showControls={true}
+                        showIndicators={true}
+                    />
+                </div>
+
+                {/* Overlay Content */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent z-10">
+                    <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+                        <motion.div
+                            className="max-w-3xl"
+                            initial={{ opacity: 0, x: -50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                        >
+                            <motion.h1
+                                className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-white"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.2 }}
+                            >
+                                About HealthCare
+                            </motion.h1>
+                            <motion.p
+                                className="text-xl md:text-2xl text-white/90 mb-8"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.4 }}
+                            >
+                                Transforming healthcare through innovation, compassion, and excellence
+                            </motion.p>
+                        </motion.div>
+                    </div>
                 </div>
             </section>
 

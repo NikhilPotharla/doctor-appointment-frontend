@@ -5,8 +5,37 @@ import AnimatedSection from '../components/common/AnimatedSection';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
+import Carousel from '../components/common/Carousel';
 
 const Contact = () => {
+    // Hero carousel images
+    const heroImages = [
+        {
+            url: 'https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=1920&h=800&fit=crop',
+            alt: 'Customer support',
+            title: 'Get In Touch',
+            description: "We're here to help and answer any questions you might have"
+        },
+        {
+            url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=1920&h=800&fit=crop',
+            alt: 'Communication',
+            title: '24/7 Support',
+            description: 'Our team is always ready to assist you'
+        },
+        {
+            url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1920&h=800&fit=crop',
+            alt: 'Healthcare consultation',
+            title: 'Expert Assistance',
+            description: 'Connect with our healthcare professionals'
+        },
+        {
+            url: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1920&h=800&fit=crop',
+            alt: 'Team collaboration',
+            title: 'We Listen',
+            description: 'Your feedback helps us improve our services'
+        }
+    ];
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -70,30 +99,46 @@ const Contact = () => {
 
     return (
         <div className="min-h-screen">
-            {/* Hero Section */}
-            <section className="relative bg-gradient-to-br from-primary-600 to-secondary-600 text-white py-24 overflow-hidden">
-                <motion.div
-                    className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"
-                    animate={{ x: [0, -50, 0], y: [0, -30, 0] }}
-                    transition={{ duration: 20, repeat: Infinity }}
-                />
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <motion.h1
-                        className="text-5xl md:text-6xl font-bold mb-6"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        Get In Touch
-                    </motion.h1>
-                    <motion.p
-                        className="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                    >
-                        We're here to help and answer any questions you might have
-                    </motion.p>
+            {/* Hero Section - Full Screen Carousel */}
+            <section className="relative h-[600px] md:h-[700px] w-full overflow-hidden">
+                {/* Full-width Carousel */}
+                <div className="absolute inset-0 w-full h-full">
+                    <Carousel
+                        images={heroImages}
+                        autoPlay={true}
+                        interval={5000}
+                        showControls={true}
+                        showIndicators={true}
+                    />
+                </div>
+
+                {/* Overlay Content */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent z-10">
+                    <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+                        <motion.div
+                            className="max-w-3xl"
+                            initial={{ opacity: 0, x: -50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                        >
+                            <motion.h1
+                                className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-white"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.2 }}
+                            >
+                                Get In Touch
+                            </motion.h1>
+                            <motion.p
+                                className="text-xl md:text-2xl text-white/90"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.4 }}
+                            >
+                                We're here to help and answer any questions you might have
+                            </motion.p>
+                        </motion.div>
+                    </div>
                 </div>
             </section>
 
