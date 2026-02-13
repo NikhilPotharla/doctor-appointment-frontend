@@ -8,6 +8,8 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 
 // Pages
 import Home from './pages/Home';
+import About from './pages/About';
+import Contact from './pages/Contact';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import PatientDashboard from './pages/patient/PatientDashboard';
@@ -25,6 +27,8 @@ function App() {
                         <Routes>
                             {/* Public Routes */}
                             <Route path="/" element={<Home />} />
+                            <Route path="/about" element={<About />} />
+                            <Route path="/contact" element={<Contact />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
 

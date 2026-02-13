@@ -5,47 +5,63 @@ import { FaUserMd, FaCalendarCheck, FaShieldAlt, FaClock } from 'react-icons/fa'
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import AnimatedSection from '../components/common/AnimatedSection';
+import Carousel from '../components/common/Carousel';
 
 const Home = () => {
+    // Carousel images for hero section
+    const heroImages = [
+        {
+            url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920&h=800&fit=crop',
+            alt: 'Modern hospital facility',
+            title: 'World-Class Healthcare',
+            description: 'State-of-the-art medical facilities at your service'
+        },
+        {
+            url: 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=1920&h=800&fit=crop',
+            alt: 'Doctor consultation',
+            title: 'Expert Medical Care',
+            description: 'Experienced doctors ready to help you'
+        },
+        {
+            url: 'https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=1920&h=800&fit=crop',
+            alt: 'Medical technology',
+            title: 'Advanced Technology',
+            description: 'Latest medical equipment for accurate diagnosis'
+        },
+        {
+            url: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=1920&h=800&fit=crop',
+            alt: 'Patient care',
+            title: 'Compassionate Care',
+            description: 'Your health and comfort are our priority'
+        }
+    ];
+
     return (
         <div className="min-h-screen">
-            {/* Hero Section */}
-            <section className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600 text-white py-20 overflow-hidden">
-                {/* Animated background elements */}
-                <motion.div
-                    className="absolute top-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"
-                    animate={{
-                        x: [0, 100, 0],
-                        y: [0, 50, 0],
-                    }}
-                    transition={{
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                    }}
-                />
-                <motion.div
-                    className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"
-                    animate={{
-                        x: [0, -100, 0],
-                        y: [0, -50, 0],
-                    }}
-                    transition={{
-                        duration: 15,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                    }}
-                />
+            {/* Hero Section - Full Screen Carousel */}
+            <section className="relative h-[600px] md:h-[700px] w-full overflow-hidden">
+                {/* Full-width Carousel */}
+                <div className="absolute inset-0 w-full h-full">
+                    <Carousel
+                        images={heroImages}
+                        autoPlay={true}
+                        interval={4000}
+                        showControls={true}
+                        showIndicators={true}
+                    />
+                </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                {/* Overlay Content */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent z-10">
+                    <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
                         <motion.div
+                            className="max-w-2xl"
                             initial={{ opacity: 0, x: -50 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, ease: "easeOut" }}
                         >
                             <motion.h1
-                                className="text-5xl font-bold mb-6"
+                                className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-white"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.8, delay: 0.2 }}
@@ -53,7 +69,7 @@ const Home = () => {
                                 Your Health, Our Priority
                             </motion.h1>
                             <motion.p
-                                className="text-xl mb-8 text-primary-100"
+                                className="text-xl md:text-2xl mb-8 text-white/90"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.8, delay: 0.4 }}
@@ -67,7 +83,9 @@ const Home = () => {
                                 transition={{ duration: 0.8, delay: 0.6 }}
                             >
                                 <Link to="/register">
-                                    <Button variant="secondary" size="lg">Get Started</Button>
+                                    <Button variant="primary" size="lg" className="bg-primary-600 hover:bg-primary-700">
+                                        Get Started
+                                    </Button>
                                 </Link>
                                 <Link to="/doctors">
                                     <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-primary-600">
@@ -76,27 +94,22 @@ const Home = () => {
                                 </Link>
                             </motion.div>
                         </motion.div>
-
-                        <motion.div
-                            className="hidden md:block"
-                            initial={{ opacity: 0, x: 50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.8, delay: 0.3 }}
-                        >
-                            <motion.div
-                                className="bg-white/10 backdrop-blur-lg rounded-2xl p-8"
-                                whileHover={{ scale: 1.02 }}
-                                transition={{ type: "spring", stiffness: 300 }}
-                            >
-                                <img
-                                    src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600"
-                                    alt="Healthcare"
-                                    className="rounded-xl shadow-2xl"
-                                />
-                            </motion.div>
-                        </motion.div>
                     </div>
                 </div>
+
+                {/* Animated floating elements */}
+                <motion.div
+                    className="absolute top-20 right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl z-5"
+                    animate={{
+                        x: [0, 50, 0],
+                        y: [0, 30, 0],
+                    }}
+                    transition={{
+                        duration: 15,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                />
             </section>
 
             {/* Features Section */}
