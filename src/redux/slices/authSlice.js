@@ -6,7 +6,7 @@ const initialState = {
     isAuthenticated: !!localStorage.getItem('token'),
     loading: false,
     error: null,
-    role: JSON.parse(localStorage.getItem('user'))?.role || null,
+    role: JSON.parse(localStorage.getItem('user'))?.role?.toLowerCase() || null,
 };
 
 const authSlice = createSlice({
@@ -22,7 +22,7 @@ const authSlice = createSlice({
             state.isAuthenticated = true;
             state.user = action.payload.user;
             state.token = action.payload.token;
-            state.role = action.payload.user.role;
+            state.role = action.payload.user.role.toLowerCase();
             state.error = null;
             // Token is already saved by authService, but keep for consistency
             localStorage.setItem('token', action.payload.token);

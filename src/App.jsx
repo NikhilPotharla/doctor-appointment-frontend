@@ -13,7 +13,11 @@ import Contact from './pages/Contact';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import PatientDashboard from './pages/patient/PatientDashboard';
+import PatientAppointments from './pages/patient/PatientAppointments';
 import DoctorDashboard from './pages/doctor/DoctorDashboard';
+import DoctorList from './pages/DoctorList';
+import DoctorDetails from './pages/DoctorDetails';
+import BookAppointment from './pages/BookAppointment';
 
 import './style.css';
 
@@ -31,6 +35,8 @@ function App() {
                             <Route path="/contact" element={<Contact />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
+                            <Route path="/doctors" element={<DoctorList />} />
+                            <Route path="/doctors/:id" element={<DoctorDetails />} />
 
                             {/* Patient Routes */}
                             <Route
@@ -38,6 +44,22 @@ function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={['patient']}>
                                         <PatientDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/patient/appointments"
+                                element={
+                                    <ProtectedRoute allowedRoles={['patient']}>
+                                        <PatientAppointments />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/book-appointment/:doctorId"
+                                element={
+                                    <ProtectedRoute allowedRoles={['patient']}>
+                                        <BookAppointment />
                                     </ProtectedRoute>
                                 }
                             />

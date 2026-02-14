@@ -40,6 +40,20 @@ export const appointmentService = {
         });
         return response.data;
     },
+
+    // Check slot availability
+    checkSlotAvailability: async (doctorId, date, startTime) => {
+        const response = await apiClient.get(`/appointments/check-availability`, {
+            params: { doctorId, date, startTime }
+        });
+        return response.data;
+    },
+
+    // Get appointments by status
+    getAppointmentsByStatus: async (status) => {
+        const response = await apiClient.get(`/patients/appointments?status=${status}`);
+        return response.data;
+    },
 };
 
 export default appointmentService;
