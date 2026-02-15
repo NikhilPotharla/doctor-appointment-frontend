@@ -48,6 +48,12 @@ const DoctorList = () => {
         { value: 'psychiatry', label: 'Psychiatry', count: 7 }
     ];
 
+    // Helper function to format specialization name
+    const formatSpecialization = (specId) => {
+        const spec = specializations.find(s => s.value === specId);
+        return spec ? spec.label : specId ? specId.charAt(0).toUpperCase() + specId.slice(1) : 'General Physician';
+    };
+
     const filterConfig = [
         {
             id: 'specialization',
@@ -66,37 +72,37 @@ const DoctorList = () => {
             selected: filters.minExperience,
             formatValue: (val) => `${val} years`
         },
-        {
-            id: 'maxFee',
-            label: 'Maximum Consultation Fee',
-            type: 'range',
-            min: 0,
-            max: 5000,
-            step: 100,
-            selected: filters.maxFee,
-            formatValue: (val) => `₹${val}`
-        },
-        {
-            id: 'rating',
-            label: 'Minimum Rating',
-            type: 'range',
-            min: 0,
-            max: 5,
-            step: 0.5,
-            selected: filters.rating,
-            formatValue: (val) => `${val} ⭐`
-        }
+
     ];
 
     useEffect(() => {
         fetchDoctors();
     }, [filters, sortBy]);
 
+    // Sync searchQuery with filters.search
+    useEffect(() => {
+        setSearchQuery(filters.search || '');
+    }, [filters.search]);
+
     const fetchDoctors = async () => {
         dispatch(fetchDoctorsStart());
         try {
             // Build query params, only include non-empty values
-            const queryParams = {};
+            // Map UI sort options to backend parameters
+            let sortParams = {};
+            if (sortBy === 'rating') {
+                sortParams = { sortBy: 'averageRating', sortOrder: 'desc' };
+            } else if (sortBy === 'experience') {
+                sortParams = { sortBy: 'experienceYears', sortOrder: 'desc' };
+            } else if (sortBy === 'fee_asc') {
+                sortParams = { sortBy: 'consultationFee', sortOrder: 'asc' };
+            } else if (sortBy === 'fee_desc') {
+                sortParams = { sortBy: 'consultationFee', sortOrder: 'desc' };
+            }
+
+            const queryParams = {
+                ...sortParams
+            };
 
             if (filters.specialization && filters.specialization.length > 0) {
                 queryParams.specialization = filters.specialization.join(',');
@@ -106,26 +112,29 @@ const DoctorList = () => {
             }
             if (filters.maxFee < 5000) {
                 queryParams.maxFee = filters.maxFee;
+            } else if (filters.maxFee === 5000) {
+                // Include maxFee even at max value to ensure filtering works
+                queryParams.maxFee = filters.maxFee;
             }
             if (filters.rating > 0) {
-                queryParams.rating = filters.rating;
+                queryParams.minRating = filters.rating; // Backend expects minRating
             }
             if (filters.search) {
                 queryParams.search = filters.search;
             }
-            if (sortBy) {
-                queryParams.sortBy = sortBy;
-            }
+
+            // Debug: Log the query parameters
+            console.log('Filter Query Parameters:', queryParams);
 
             const response = await doctorService.getDoctors(queryParams);
 
-            // Handle different response formats
-            const doctorsData = response.data || response.doctors || response;
-            const doctors = Array.isArray(doctorsData) ? doctorsData : [];
+            // Handle response format from backend: { success: true, data: { doctors: [], pagination: {} } }
+            const data = response.data || response;
+            const doctors = Array.isArray(data.doctors) ? data.doctors : [];
 
             dispatch(fetchDoctorsSuccess({
                 doctors: doctors,
-                total: response.total || doctors.length
+                total: data.pagination?.total || doctors.length
             }));
         } catch (error) {
             console.error('Error fetching doctors:', error);
@@ -159,6 +168,14 @@ const DoctorList = () => {
     const handleSearch = (e) => {
         e.preventDefault();
         dispatch(updateFilters({ search: searchQuery }));
+    };
+
+    // Real-time search (search as you type)
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        // Enable real-time search
+        dispatch(updateFilters({ search: value }));
     };
 
     const handleFilterChange = (filterId, value) => {
@@ -210,8 +227,8 @@ const DoctorList = () => {
                 <div className={`flex ${viewMode === 'list' ? 'flex-row items-center gap-6' : 'flex-col'}`}>
                     {/* Doctor Image */}
                     <div className={`${viewMode === 'list' ? 'w-32 h-32' : 'w-full h-48'} bg-gradient-to-br from-primary-100 to-secondary-100 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300 overflow-hidden`}>
-                        {doctor.profilePicture ? (
-                            <img src={doctor.profilePicture} alt={doctor.firstName} className="w-full h-full object-cover" />
+                        {doctor.user?.profile?.profilePicture ? (
+                            <img src={doctor.user.profile.profilePicture} alt={doctor.user?.profile?.firstName || 'Doctor'} className="w-full h-full object-cover" />
                         ) : (
                             <FaUserMd className="text-primary-600 text-6xl" />
                         )}
@@ -220,17 +237,17 @@ const DoctorList = () => {
                     {/* Doctor Info */}
                     <div className={`${viewMode === 'list' ? 'flex-1' : 'mt-4'}`}>
                         <h3 className="text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
-                            Dr. {doctor.firstName} {doctor.lastName}
+                            Dr. {doctor.user?.profile?.firstName || 'Unknown'} {doctor.user?.profile?.lastName || 'Doctor'}
                         </h3>
-                        <p className="text-primary-600 font-medium mt-1">{doctor.specialization || 'General Physician'}</p>
+                        <p className="text-primary-600 font-medium mt-1">{formatSpecialization(doctor.specializationId)}</p>
 
                         {/* Rating */}
                         <div className="flex items-center gap-2 mt-2">
                             <div className="flex gap-1">
-                                {renderStars(doctor.rating || 4.5)}
+                                {renderStars(doctor.averageRating || 4.5)}
                             </div>
                             <span className="text-sm text-gray-600">
-                                ({doctor.reviewCount || 0} reviews)
+                                ({doctor.totalReviews || 0} reviews)
                             </span>
                         </div>
 
@@ -259,7 +276,11 @@ const DoctorList = () => {
                                 variant="primary"
                                 size="sm"
                                 className="flex-1"
-                                onClick={() => navigate(`/doctors/${doctor.id}`)}
+                                onClick={() => {
+                                    console.log('Navigating to doctor profile. Doctor ID:', doctor.id);
+                                    console.log('Full doctor object:', doctor);
+                                    navigate(`/doctors/${doctor.id}`);
+                                }}
                             >
                                 View Profile
                             </Button>
@@ -308,10 +329,22 @@ const DoctorList = () => {
                             <input
                                 type="text"
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search by doctor name or specialization..."
-                                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                onChange={handleSearchChange}
+                                placeholder="Search by specialization (cardio, derma, neuro...) or doctor name..."
+                                className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                             />
+                            {searchQuery && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        dispatch(updateFilters({ search: '' }));
+                                    }}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    <FaTimes />
+                                </button>
+                            )}
                         </div>
                         <Button type="submit" variant="primary">
                             Search

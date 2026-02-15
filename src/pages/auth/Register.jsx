@@ -18,6 +18,8 @@ const Register = () => {
         specialization: '',
         licenseNumber: '',
         experience: '',
+        consultationFee: '',
+        about: '',
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
@@ -60,6 +62,7 @@ const Register = () => {
             if (!formData.specialization) newErrors.specialization = 'Specialization is required';
             if (!formData.licenseNumber) newErrors.licenseNumber = 'License number is required';
             if (!formData.experience) newErrors.experience = 'Experience is required';
+            if (!formData.consultationFee) newErrors.consultationFee = 'Consultation fee is required';
         }
 
         return newErrors;
@@ -86,9 +89,12 @@ const Register = () => {
             };
 
             if (userType === 'doctor') {
-                registrationData.specialization = formData.specialization;
+                registrationData.specializationId = formData.specialization.toLowerCase();
                 registrationData.licenseNumber = formData.licenseNumber;
                 registrationData.experienceYears = parseInt(formData.experience);
+                registrationData.consultationFee = parseFloat(formData.consultationFee);
+                registrationData.about = formData.about;
+                registrationData.qualification = ['MBBS', formData.specialization];
                 await authService.registerDoctor(registrationData);
             } else {
                 await authService.registerPatient(registrationData);
@@ -120,11 +126,10 @@ const Register = () => {
                     <button
                         type="button"
                         onClick={() => setUserType('patient')}
-                        className={`flex-1 py-4 px-6 rounded-xl border-2 transition-all ${
-                            userType === 'patient'
-                                ? 'border-primary-600 bg-primary-50'
-                                : 'border-gray-300 hover:border-primary-300'
-                        }`}
+                        className={`flex-1 py-4 px-6 rounded-xl border-2 transition-all ${userType === 'patient'
+                            ? 'border-primary-600 bg-primary-50'
+                            : 'border-gray-300 hover:border-primary-300'
+                            }`}
                     >
                         <FaUser className={`mx-auto text-3xl mb-2 ${userType === 'patient' ? 'text-primary-600' : 'text-gray-400'}`} />
                         <p className={`font-semibold ${userType === 'patient' ? 'text-primary-600' : 'text-gray-600'}`}>
@@ -134,11 +139,10 @@ const Register = () => {
                     <button
                         type="button"
                         onClick={() => setUserType('doctor')}
-                        className={`flex-1 py-4 px-6 rounded-xl border-2 transition-all ${
-                            userType === 'doctor'
-                                ? 'border-primary-600 bg-primary-50'
-                                : 'border-gray-300 hover:border-primary-300'
-                        }`}
+                        className={`flex-1 py-4 px-6 rounded-xl border-2 transition-all ${userType === 'doctor'
+                            ? 'border-primary-600 bg-primary-50'
+                            : 'border-gray-300 hover:border-primary-300'
+                            }`}
                     >
                         <FaUserMd className={`mx-auto text-3xl mb-2 ${userType === 'doctor' ? 'text-primary-600' : 'text-gray-400'}`} />
                         <p className={`font-semibold ${userType === 'doctor' ? 'text-primary-600' : 'text-gray-600'}`}>
@@ -208,15 +212,32 @@ const Register = () => {
 
                     {userType === 'doctor' && (
                         <>
-                            <Input
-                                label="Specialization"
-                                name="specialization"
-                                value={formData.specialization}
-                                onChange={handleChange}
-                                placeholder="e.g., Cardiologist, Dermatologist"
-                                error={errors.specialization}
-                                required
-                            />
+                            <div className="mb-4">
+                                <label htmlFor="specialization" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Specialization <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    id="specialization"
+                                    name="specialization"
+                                    value={formData.specialization}
+                                    onChange={handleChange}
+                                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.specialization ? 'border-red-500 focus:ring-red-500' : ''}`}
+                                    required
+                                >
+                                    <option value="">Select Specialization</option>
+                                    <option value="cardiology">Cardiology</option>
+                                    <option value="dermatology">Dermatology</option>
+                                    <option value="neurology">Neurology</option>
+                                    <option value="orthopedics">Orthopedics</option>
+                                    <option value="pediatrics">Pediatrics</option>
+                                    <option value="psychiatry">Psychiatry</option>
+                                    <option value="general-medicine">General Medicine</option>
+                                    <option value="internal-medicine">Internal Medicine</option>
+                                    <option value="gynecology">Gynecology</option>
+                                    <option value="ophthalmology">Ophthalmology</option>
+                                </select>
+                                {errors.specialization && <p className="mt-1 text-sm text-red-600">{errors.specialization}</p>}
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Input
                                     label="License Number"
@@ -237,6 +258,31 @@ const Register = () => {
                                     error={errors.experience}
                                     required
                                 />
+                            </div>
+                            <Input
+                                label="Consultation Fee (₹)"
+                                type="number"
+                                name="consultationFee"
+                                value={formData.consultationFee}
+                                onChange={handleChange}
+                                placeholder="500"
+                                error={errors.consultationFee}
+                                required
+                            />
+                            <div className="mb-4">
+                                <label htmlFor="about" className="block text-sm font-medium text-gray-700 mb-1">
+                                    About <span className="text-gray-400">(Optional)</span>
+                                </label>
+                                <textarea
+                                    id="about"
+                                    name="about"
+                                    value={formData.about}
+                                    onChange={handleChange}
+                                    rows={3}
+                                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.about ? 'border-red-500 focus:ring-red-500' : ''}`}
+                                    placeholder="Brief description of your expertise and experience..."
+                                />
+                                {errors.about && <p className="mt-1 text-sm text-red-600">{errors.about}</p>}
                             </div>
                         </>
                     )}

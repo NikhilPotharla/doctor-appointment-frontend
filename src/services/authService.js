@@ -17,51 +17,32 @@ export const authService = {
         return response.data;
     },
 
-    // Doctor Registration (Two-step process)
+    // Doctor Registration (Now automatic with user registration)
     registerDoctor: async (doctorData) => {
-        // Step 1: Register user account with DOCTOR role
-        const registerResponse = await apiClient.post('/auth/register', { 
+        // Single step registration - doctor profile is created automatically
+        const response = await apiClient.post('/auth/register', { 
             email: doctorData.email,
             password: doctorData.password,
             firstName: doctorData.firstName,
             lastName: doctorData.lastName,
             phone: doctorData.phone,
-            role: 'DOCTOR' // Backend expects uppercase
+            role: 'DOCTOR', // Backend expects uppercase
+            // Doctor-specific fields
+            specializationId: doctorData.specialization?.toLowerCase() || 'general-medicine',
+            qualification: [doctorData.qualification || 'MBBS'],
+            experienceYears: parseInt(doctorData.experienceYears) || 0,
+            licenseNumber: doctorData.licenseNumber,
+            consultationFee: parseFloat(doctorData.consultationFee) || 500,
+            about: doctorData.about || `${doctorData.specialization || 'General'} practitioner with ${doctorData.experienceYears || 0} years of experience`,
         });
-
-        if (registerResponse.data.success && registerResponse.data.data.token) {
-            const token = registerResponse.data.data.token;
-            localStorage.setItem('token', token);
-
-            // Step 2: Create doctor profile
-            try {
-                const doctorProfileResponse = await apiClient.post(
-                    '/doctors/register',
-                    {
-                        specializationId: '00000000-0000-0000-0000-000000000001', // Default UUID
-                        qualification: ['MBBS', doctorData.specialization || 'General Medicine'],
-                        experienceYears: parseInt(doctorData.experienceYears) || 0,
-                        licenseNumber: doctorData.licenseNumber,
-                        consultationFee: 500, // Default fee
-                        about: `${doctorData.specialization || 'General'} practitioner with ${doctorData.experienceYears || 0} years of experience`,
-                    },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
-
-                localStorage.setItem('user', JSON.stringify(doctorProfileResponse.data.data.user));
-                return doctorProfileResponse.data;
-            } catch (error) {
-                console.error('Doctor profile creation failed:', error);
-                // Still return the user registration success
-                return registerResponse.data;
-            }
+        
+        // Save token and user data if registration is successful
+        if (response.data.success && response.data.data.token) {
+            localStorage.setItem('token', response.data.data.token);
+            localStorage.setItem('user', JSON.stringify(response.data.data.user));
         }
-
-        return registerResponse.data;
+        
+        return response.data;
     },
 
     // Login (works for both patients and doctors)

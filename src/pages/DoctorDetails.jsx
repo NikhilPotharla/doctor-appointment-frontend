@@ -38,10 +38,19 @@ const DoctorDetails = () => {
     const fetchDoctorDetails = async () => {
         try {
             setLoading(true);
+            console.log('Fetching doctor details for ID:', id);
             const response = await doctorService.getDoctorById(id);
-            setDoctor(response.data || response);
-            dispatch(setSelectedDoctor(response.data || response));
+            console.log('API Response:', response);
+
+            // The API returns {success, message, data: {doctorInfo}}
+            // So we need to extract the actual doctor data from response.data
+            const doctorData = response.data || response;
+            console.log('Doctor Data:', doctorData);
+
+            setDoctor(doctorData);
+            dispatch(setSelectedDoctor(doctorData));
         } catch (err) {
+            console.error('Error fetching doctor details:', err);
             setError(err.message || 'Failed to load doctor details');
         } finally {
             setLoading(false);
@@ -53,7 +62,23 @@ const DoctorDetails = () => {
             navigate('/login', { state: { from: `/doctors/${id}` } });
             return;
         }
-        navigate(`/book-appointment/${id}`);
+        navigate(`/book-appointment/${getDoctorId(doctor)}`);
+    };
+
+    // Helper function to safely get nested data
+    const safeGet = (obj, path, defaultValue = null) => {
+        try {
+            const result = path.split('.').reduce((current, key) => current && current[key], obj);
+            return result !== undefined ? result : defaultValue;
+        } catch (error) {
+            console.error('Error accessing path:', path, error);
+            return defaultValue;
+        }
+    };
+
+    // Helper to get doctor ID from different possible data structures
+    const getDoctorId = (doctor) => {
+        return doctor?.id || doctor?.data?.id || id;
     };
 
     const renderStars = (rating) => {
@@ -82,11 +107,11 @@ const DoctorDetails = () => {
         );
     }
 
-    if (error || !doctor) {
+    if (error) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
                 <Card className="max-w-md text-center">
-                    <p className="text-red-600 font-medium mb-4">{error || 'Doctor not found'}</p>
+                    <p className="text-red-600 font-medium mb-4">{error}</p>
                     <Button variant="primary" onClick={() => navigate('/doctors')}>
                         Back to Doctors
                     </Button>
@@ -95,8 +120,43 @@ const DoctorDetails = () => {
         );
     }
 
+    if (!doctor) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+                <Card className="max-w-md text-center">
+                    <p className="text-gray-600 font-medium mb-4">Doctor not found</p>
+                    <Button variant="primary" onClick={() => navigate('/doctors')}>
+                        Back to Doctors
+                    </Button>
+                </Card>
+            </div>
+        );
+    }
+
+    // Debug: Log doctor data structure
+    console.log('Rendering doctor details:', doctor);
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+            {/* Debug Panel - Added for troubleshooting white screen */}
+            <div className="bg-yellow-100 border-b-4 border-yellow-500 p-4 font-mono text-sm overflow-auto max-h-60 mb-8">
+                <h3 className="font-bold text-yellow-800 mb-2">🔍 Debug Info</h3>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <p><strong>Doctor ID:</strong> {id}</p>
+                        <p><strong>Loading:</strong> {loading.toString()}</p>
+                        <p><strong>Error:</strong> {error || 'None'}</p>
+                        <p><strong>Has Doctor Data:</strong> {doctor ? 'Yes' : 'No'}</p>
+                        <p><strong>Data Keys:</strong> {doctor ? Object.keys(doctor).join(', ') : 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p><strong>User Object:</strong> {doctor?.user ? 'Present' : 'Missing'}</p>
+                        <p><strong>Profile Object:</strong> {doctor?.user?.profile ? 'Present' : 'Missing'}</p>
+                        <p><strong>Name:</strong> {safeGet(doctor, 'user.profile.firstName')} {safeGet(doctor, 'user.profile.lastName')}</p>
+                    </div>
+                </div>
+            </div>
+
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Breadcrumb */}
                 <motion.div
@@ -123,10 +183,10 @@ const DoctorDetails = () => {
                         <div className="flex flex-col md:flex-row gap-6">
                             {/* Profile Image */}
                             <div className="w-full md:w-48 h-48 bg-gradient-to-br from-primary-100 to-secondary-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                {doctor.profilePicture ? (
+                                {safeGet(doctor, 'user.profile.profilePicture') ? (
                                     <img
-                                        src={doctor.profilePicture}
-                                        alt={doctor.firstName}
+                                        src={safeGet(doctor, 'user.profile.profilePicture')}
+                                        alt={safeGet(doctor, 'user.profile.firstName', 'Doctor')}
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
@@ -139,10 +199,10 @@ const DoctorDetails = () => {
                                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                                     <div>
                                         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                                            Dr. {doctor.firstName} {doctor.lastName}
+                                            Dr. {safeGet(doctor, 'user.profile.firstName', 'Unknown')} {safeGet(doctor, 'user.profile.lastName', 'Doctor')}
                                         </h1>
                                         <p className="text-xl text-primary-600 font-medium">
-                                            {doctor.specialization || 'General Physician'}
+                                            {safeGet(doctor, 'specializationId', 'General Physician')}
                                         </p>
                                     </div>
 
@@ -160,13 +220,13 @@ const DoctorDetails = () => {
                                 {/* Rating */}
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className="flex gap-1">
-                                        {renderStars(doctor.rating || 4.5)}
+                                        {renderStars(doctor.averageRating || 4.5)}
                                     </div>
                                     <span className="text-lg font-semibold text-gray-900">
-                                        {(doctor.rating || 4.5).toFixed(1)}
+                                        {(doctor.averageRating || 4.5).toFixed(1)}
                                     </span>
                                     <span className="text-gray-600">
-                                        ({doctor.reviewCount || 0} reviews)
+                                        ({doctor.totalReviews || 0} reviews)
                                     </span>
                                 </div>
 
@@ -209,7 +269,7 @@ const DoctorDetails = () => {
                             <Card>
                                 <h2 className="text-2xl font-bold text-gray-900 mb-4">About</h2>
                                 <p className="text-gray-700 leading-relaxed">
-                                    {doctor.about || `Dr. ${doctor.firstName} ${doctor.lastName} is a highly qualified ${doctor.specialization || 'medical'} professional with ${doctor.experienceYears || 0} years of experience. Dedicated to providing exceptional patient care and staying updated with the latest medical advancements.`}
+                                    {doctor.about || `Dr. ${safeGet(doctor, 'user.profile.firstName', 'Unknown')} ${safeGet(doctor, 'user.profile.lastName', 'Doctor')} is a highly qualified ${safeGet(doctor, 'specializationId', 'medical')} professional with ${doctor.experienceYears || 0} years of experience. Dedicated to providing exceptional patient care and staying updated with the latest medical advancements.`}
                                 </p>
                             </Card>
                         </motion.div>
@@ -304,25 +364,27 @@ const DoctorDetails = () => {
                             <Card>
                                 <h3 className="text-xl font-bold text-gray-900 mb-4">Contact Information</h3>
                                 <div className="space-y-3 text-sm">
-                                    {doctor.phone && (
+                                    {doctor.user?.phone && (
                                         <div>
                                             <p className="text-gray-600">Phone</p>
-                                            <p className="font-medium text-gray-900">{doctor.phone}</p>
+                                            <p className="font-medium text-gray-900">{safeGet(doctor, 'user.phone')}</p>
                                         </div>
                                     )}
-                                    {doctor.email && (
+                                    {doctor.user?.email && (
                                         <div>
                                             <p className="text-gray-600">Email</p>
-                                            <p className="font-medium text-gray-900">{doctor.email}</p>
+                                            <p className="font-medium text-gray-900">{safeGet(doctor, 'user.email')}</p>
                                         </div>
                                     )}
-                                    {doctor.location && (
+                                    {doctor.clinics && doctor.clinics.length > 0 && (
                                         <div>
                                             <p className="text-gray-600 flex items-center gap-1">
                                                 <FaMapMarkerAlt className="text-primary-600" />
                                                 Location
                                             </p>
-                                            <p className="font-medium text-gray-900">{doctor.location}</p>
+                                            <p className="font-medium text-gray-900">
+                                                {safeGet(doctor, 'clinics.0.address')}, {safeGet(doctor, 'clinics.0.city')}
+                                            </p>
                                         </div>
                                     )}
                                 </div>

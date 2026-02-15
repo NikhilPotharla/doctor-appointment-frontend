@@ -2,19 +2,26 @@ import React from 'react';
 
 const Loader = ({ size = 'md', fullScreen = false }) => {
     const sizes = {
-        sm: 'w-6 h-6',
-        md: 'w-10 h-10',
-        lg: 'w-16 h-16',
+        sm: 'h-2 w-2',
+        md: 'h-4 w-4',
+        lg: 'h-6 w-6',
     };
 
+    // Modern "Three Bouncing Dots" loader
     const spinner = (
-        <div className={`${sizes[size]} border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin`}></div>
+        <div className="flex space-x-2 justify-center items-center">
+            <span className="sr-only">Loading...</span>
+            <div className={`${sizes[size]} bg-primary-600 rounded-full animate-bounce [animation-delay:-0.3s]`}></div>
+            <div className={`${sizes[size]} bg-primary-600 rounded-full animate-bounce [animation-delay:-0.15s]`}></div>
+            <div className={`${sizes[size]} bg-primary-600 rounded-full animate-bounce`}></div>
+        </div>
     );
 
     if (fullScreen) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50">
+            <div className="fixed inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm z-50">
                 {spinner}
+                <p className="mt-4 text-gray-500 font-medium tracking-wide animate-pulse">Loading...</p>
             </div>
         );
     }
